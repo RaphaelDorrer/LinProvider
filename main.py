@@ -6,10 +6,15 @@ import threading
 import netifaces as ni
 from utils.security import SecurityHTTPRequestHandler
 import psutil
+import json
 
-LINPEAS_URL = "https://github.com/peass-ng/PEASS-ng/releases/latest/download/linpeas.sh"
-DEFAULT_PORT = 1337
-DEFAULT_INTERFACE = 'utun7'
+# get config
+with open("./config.json", "r") as f:
+    config = json.load(f)
+
+LINPEAS_URL = config["LINPEAS_URL"]
+DEFAULT_PORT = config["DEFAULT_PORT"]
+DEFAULT_INTERFACE = config["DEFAULT_INTERFACE"]
 
 def get_linpeas():
     linpeas_contents = requests.get(LINPEAS_URL)
@@ -40,7 +45,6 @@ def get_interface():
     # this isnt perfect but will work
 
     interfaces = psutil.net_if_addrs()
-    print(interfaces.keys())
 
     if DEFAULT_INTERFACE in interfaces.keys():
         return DEFAULT_INTERFACE
