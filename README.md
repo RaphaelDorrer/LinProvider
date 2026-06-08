@@ -2,8 +2,11 @@
 
 > A simple way to provide Linpeas because I am to lazy to type the command myself!
 
+Install:
+> uv tool install .
+
 Usage:
-> lp
+> lp [--no-renew] [--port PORT] [--inf INTERFACE]
 
 Todo:
 - [ ] add access control

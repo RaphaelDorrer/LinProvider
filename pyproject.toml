@@ -6,8 +6,15 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "netifaces>=0.11.0",
+    "pathlib>=1.0.1",
     "psutil>=7.2.2",
     "requests>=2.34.2",
     "typer>=0.26.7",
     "typing-extensions>=4.15.0",
 ]
+
+[project.scripts]
+lp = "linprovider.cli:app"
+
+[tool.setuptools.package-data]
+linprovider = ["config.json"]

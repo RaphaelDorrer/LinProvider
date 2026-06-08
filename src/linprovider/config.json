@@ -1,0 +1,5 @@
+{
+    "LINPEAS_URL":"https://github.com/peass-ng/PEASS-ng/releases/latest/download/linpeas.sh",
+    "DEFAULT_PORT":1337,
+    "DEFAULT_INTERFACE":"utun7"
+}
